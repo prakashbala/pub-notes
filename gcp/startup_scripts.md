@@ -1,0 +1,59 @@
+GCP Startup Scripts 
+
+-  Will startup scripts execute at every restart? 
+- Can run on project level or VM level 
+- Can run any script, e.g., for python #! /usr/bin/python3
+-  Runs as root user
+    -  Bummer! How to run as normal user 
+-  A start up script is passed to a VM from the location that is specified by a metadata key. 
+    -  What is a metadata key? 
+    -  A metadata key specifies whether the script is stored at local(VM itself), in cloud storage, or passed directly to the VM. 
+        -  How to pass directly to the VM? 
+    - Metadata keys: 
+        -  startup-script
+            -  pass bash or non-bash script 
+            -  stored at local machine or added directly (How to pass directly to the VM? )
+            -  size upto 256 KB
+        -  startup-script-url 
+            -  pass bash or non-bash script 
+            -  stored in cloud storage 
+            -  greater than 256 KB
+            -  gsutil will run it
+            -  if url contains space characters, don't replace with %20 or add double quotes ("") 
+-  Order of execution 
+    -  can use multiple startup scripts
+    -  execution preference: stored at local, added directly to the VM, cloud storage 
+- Passing a linux start up script directly to a new VM
+    -  Permissions required : 
+        -  compute.instances.setMetadata
+    -  Example
+        -  Create a VM instance 
+        -  Boot disk : select linux OS 
+        -  Management Section and in Automation section 
+            -  startup script can be added 
+-  Passing a linux start up script directly to a existing VM
+    -  Go to VM instances
+    -  Click VM & Edit 
+    -  Under Metadata, specify key: startup-script, value : contents of the script 
+-  Passing a linux startup script from a local file 
+        -  New Instance
+            - LATER 
+        - Existing Instance 
+            - gcloud compute instances add-metadata VM_NAME \
+                --metadata-from-file startup-script=FILE_PATH
+-  Passing a linux start up script from cloud storage 
+    -  Prerequisites: 
+        -  We need a service account with the role roles/storage.objectViewer
+    -  LATER
+-  Accessing metadata from a Linux startup script
+    -  With the same script, we can pass different values as arguments with the help of accessing metadata 
+    -  We can pass metadata like thie below
+        -  gcloud compute instances create VM_NAME \
+            --image-project=debian-cloud \
+            --image-family=debian-10 \
+            --metadata-from-file=startup-script=FILE_PATH \
+            --metadata=foo=bar
+- Rerunning a Linux startup script
+    - sudo google_metadata_script_runner startup
+- Viewing the output of a Linux startup script
+    - sudo journalctl -u google-startup-scripts.service
